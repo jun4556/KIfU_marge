@@ -3,7 +3,7 @@ package com.objetdirect.gwt.umldrawer.client.canvas;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+//import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.objetdirect.gwt.umldrawer.client.beans.EditEvent;
 import com.objetdirect.gwt.umldrawer.client.beans.SaveEventInfo;
 
@@ -13,7 +13,7 @@ import com.objetdirect.gwt.umldrawer.client.beans.SaveEventInfo;
  * このサービスのすべてのメソッド呼び出しが "/[モジュール名]/canvas" というURLに
  * マッピングされるようになります。これが404エラーを解決します。
  */
-@RemoteServiceRelativePath("canvas")
+//@RemoteServiceRelativePath("canvas")
 public interface CanvasService extends RemoteService {
 
 	// --- 既存のメソッド ---

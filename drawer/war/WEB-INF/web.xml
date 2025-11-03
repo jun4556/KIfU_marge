@@ -339,7 +339,21 @@
     <!-- 以下　柄澤追加部分 -->
     <servlet-mapping>
 		<servlet-name>CanvasServiceImpl</servlet-name>
-		<url-pattern>/gwtumldrawer/canvas</url-pattern>
+		<url-pattern>/gwtumldrawer/mergeCanvas</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>CanvasServiceImpl</servlet-name>
+		<url-pattern>/gwtumldrawer/saveMergedCanvas</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>CanvasServiceImpl</servlet-name>
+		<url-pattern>/gwtumldrawer/getRecentSaves</url-pattern>
+	</servlet-mapping>
+<!--    <servlet-mapping>-->
+<!--		<servlet-name>CanvasServiceImpl</servlet-name>-->
+<!--		<url-pattern>/gwtumldrawer/canvas</url-pattern>-->
+<!--	</servlet-mapping>-->
 	
 </web-app>

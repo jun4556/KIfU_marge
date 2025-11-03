@@ -104,11 +104,11 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 		super();
 		this.uMLCanvas = Session.getActiveCanvas(); // uMLCanvas を初期化
 		
-		// ★★★ CanvasService のエンドポイントを設定 ★★★
-        ServiceDefTarget entryPoint = (ServiceDefTarget) canvasService;
-        String entryURL = GWT.getModuleBaseURL() + "canvas"; // "canvas"は@RemoteServiceRelativePathの値
-        entryPoint.setServiceEntryPoint(entryURL);
-        // ★★★ ここまで ★★★
+//		// ★★★ CanvasService のエンドポイントを設定 ★★★
+//        ServiceDefTarget entryPoint = (ServiceDefTarget) canvasService;
+//        String entryURL = GWT.getModuleBaseURL() + "canvas"; // "canvas"は@RemoteServiceRelativePathの値
+//        entryPoint.setServiceEntryPoint(entryURL);
+//        // ★★★ ここまで ★★★
 
 		// コードの状態を取得してくれるRPC
 		chathcodestate_ = new CatchSourceCodeChengeState(this);
@@ -1187,7 +1187,9 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	    final DialogBox dialogBox = new DialogBox();
 	    dialogBox.setText("マージ相手の情報を入力");
 	    dialogBox.setAnimationEnabled(true);
+	    dialogBox.setGlassEnabled(true);
 
+	    
 	    // ダイアログ内の要素を配置するパネル
 	    VerticalPanel dialogContents = new VerticalPanel();
 	    dialogContents.setSpacing(4);
@@ -1218,11 +1220,23 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	            dialogBox.hide(); // 処理を開始したらダイアログを閉じる
 	        }
 	    });
-	    dialogContents.add(mergeExecuteButton);
-
+	    
+	    Button closeButton = new Button("閉じる", new ClickHandler() {
+	    	public void onClick(ClickEvent event) {
+	    		dialogBox.hide(); 
+	    		}
+	    	});
+	 // ボタンを横に並べる
+	    HorizontalPanel buttonPanel = new HorizontalPanel();
+	    buttonPanel.setSpacing(10);
+	    buttonPanel.add(mergeExecuteButton);
+	    buttonPanel.add(closeButton); // 閉じるボタンを追加
+	    // dialogContents.add(mergeExecuteButton); // ← 元の行をコメントアウト
+	    dialogContents.add(buttonPanel); // ← 新しいボタンパネルに入れ替える
+	    // ▲▲▲ オプションここまで ▲▲▲
 	    dialogBox.setWidget(dialogContents);
 	    dialogBox.center(); // 画面中央に表示
-	}
+	    }
 	
 
 	/**
@@ -1234,7 +1248,11 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 
 	private void executeMerge(final String opponentId, final String commonId) {
 	    // 1. 相手のCanvas URLを取得
-	    CanvasServiceAsync loadAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);
+	    CanvasServiceAsync loadAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);	 // ▼▼▼ エンドポイント設定を追加 (CanvasInitメソッドを参考に "loadCanvas" を指定) ▼▼▼
+	    ServiceDefTarget loadEntryPoint = (ServiceDefTarget) loadAsync;
+	    String loadEntryURL = GWT.getModuleBaseURL() + "loadCanvas";
+	    loadEntryPoint.setServiceEntryPoint(loadEntryURL);
+
 	    // ... (ServiceDefTargetの設定) ...
 	    loadAsync.loadCanvas(opponentId, Session.exerciseId, new AsyncCallback<EditEvent>() {
 	        public void onFailure(Throwable caught) {
@@ -1251,7 +1269,12 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	            String myUrl = uMLCanvas.toUrl();
 
 	            // 2. サーバーのマージ機能を呼び出す
-	            CanvasServiceAsync mergeAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);
+	            CanvasServiceAsync mergeAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);	         // ▼▼▼ エンドポイント設定を追加 (サービス名を "mergeCanvas" と仮定) ▼▼▼
+	            ServiceDefTarget mergeEntryPoint = (ServiceDefTarget) mergeAsync;
+	            // "mergeCanvas" が正しいサービスパスであることを確認してください (web.xmlなど)
+	            String mergeEntryURL = GWT.getModuleBaseURL() + "mergeCanvas"; 
+	            mergeEntryPoint.setServiceEntryPoint(mergeEntryURL);
+
 	            // ... (ServiceDefTargetの設定) ...
 	            mergeAsync.mergeCanvas(myUrl, opponentUrl, new AsyncCallback<String>() {
 	                @Override
@@ -1262,10 +1285,42 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	                @Override
 	                public void onSuccess(String mergedUrl) {
 	                    Window.alert("マージが完了しました。共通ID「" + commonId + "」で結果を保存します。");
-	                    
-	                    // 3. マージ結果を保存し、表示する
-	                    saveMergedCanvas(commonId, Session.exerciseId, mergedUrl);
-	                    Session.getActiveCanvas().fromURL(mergedUrl, false); // キャンバスにマージ結果を反映
+						
+						// 1. 現在の studentId をバックアップ
+						String originalStudentId = Session.studentId; 
+						
+						try {
+							// 2. Session の studentId を commonId に一時的に設定
+							//    (これにより MyLoggerExecute は commonId を studentId として扱います)
+							Session.studentId = commonId;
+							
+							// 3. MyLoggerExecute を呼び出す (Saveボタンと同じロジック)
+							MyLoggerExecute.registEditEvent(
+									-1, // preEventId
+									"Merge", // editEvent
+									"Merge", // eventType
+									null, // targetType
+									-1, // targetId
+									null, // linkKind
+									-1, // rightObjectId
+									-1, // leftObjectId
+									null, // targetPart
+									null, // beforeEdit
+									null, // afterEdit
+									mergedUrl, // canvasUrl (マージされたURL)
+									UMLArtifact.getIdCount() // 現在のIDカウント
+							);
+							
+							Window.alert("マージ結果を共通ID「" + commonId + "」でログ保存しました。");
+							
+						} catch (Exception e) {
+							Window.alert("マージログの保存に失敗しました: " + e.getMessage());
+						} finally {
+							// 4. studentId を必ず元に戻す
+							Session.studentId = originalStudentId;
+						}
+
+//	                    Session.getActiveCanvas().fromURL(mergedUrl, false); // キャンバスにマージ結果を反映
 	                }
 	            });
 	        }
@@ -1281,11 +1336,11 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	 */
 	private void saveMergedCanvas(String commonId, int exerciseId, String mergedUrl) {
 	    CanvasServiceAsync async = (CanvasServiceAsync) GWT.create(CanvasService.class);
-//	 // ▼▼▼ ここからが追加する部分です ▼▼▼
-//        ServiceDefTarget entryPoint = (ServiceDefTarget) async;
-//        String entryURL = GWT.getModuleBaseURL() + "saveMergedCanvas"; // 呼び出すサービス名を指定
-//        entryPoint.setServiceEntryPoint(entryURL);
-//        // ▲▲▲ ここまで追加します ▲▲▲
+	 // ▼▼▼ ここからが追加する部分です ▼▼▼
+        ServiceDefTarget entryPoint = (ServiceDefTarget) async;
+        String entryURL = GWT.getModuleBaseURL() + "saveMergedCanvas"; // 呼び出すサービス名を指定
+        entryPoint.setServiceEntryPoint(entryURL);
+        // ▲▲▲ ここまで追加します ▲▲▲
 
 	    async.saveMergedCanvas(commonId, exerciseId, mergedUrl, new AsyncCallback<Void>() {
 	        @Override

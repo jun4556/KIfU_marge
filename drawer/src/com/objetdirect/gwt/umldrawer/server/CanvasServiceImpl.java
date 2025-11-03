@@ -166,27 +166,29 @@ public class CanvasServiceImpl extends RemoteServiceServlet implements CanvasSer
             System.out.println("--- [CanvasServiceImpl] Python API Request ---");
             System.out.println("MyData Length: " + decodedMyUrl.length());
             System.out.println("OpponentData Length: " + decodedOpponentUrl.length());
-            // データが長すぎるとログが溢れるため、先頭200文字だけプレビュー
-            System.out.println("MyData (Preview): " + (decodedMyUrl.length() > 200 ? decodedMyUrl.substring(0, 200) : decodedMyUrl));
-            System.out.println("OpponentData (Preview): " + (decodedOpponentUrl.length() > 200 ? decodedOpponentUrl.substring(0, 200) : decodedOpponentUrl));
+         // 「全データプレビューor先頭200文字」
+            System.out.println("MyData : " + decodedMyUrl);
+            System.out.println("OpponentData : " + decodedOpponentUrl);
+//            System.out.println("MyData (Preview): " + (decodedMyUrl.length() > 200 ? decodedMyUrl.substring(0, 200) : decodedMyUrl));
+//            System.out.println("OpponentData (Preview): " + (decodedOpponentUrl.length() > 200 ? decodedOpponentUrl.substring(0, 200) : decodedOpponentUrl));
             System.out.println("----------------------------------------------");
             // ▲▲▲ デバッグログ追加 ▲▲▲
 
             URL url = new URL(pythonApiUrl);
             connection = (HttpURLConnection) url.openConnection();
-         // ▼▼▼ 1箇所目の中略部分 ▼▼▼
+
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json; utf-8");
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(30000);
-// ▲▲▲ ここまで ▲▲▲
+
             connection.setDoOutput(true);
 
             try (OutputStream os = connection.getOutputStream()) {
             	byte[] input = jsonInput.getBytes(StandardCharsets.UTF_8);
             	os.write(input, 0, input.length);
             	}
-         // ▼▼▼ 2箇所目の中略部分 ▼▼▼
+
             int responseCode = connection.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
 				String errorResponse = "";
@@ -196,7 +198,7 @@ public class CanvasServiceImpl extends RemoteServiceServlet implements CanvasSer
 				} catch (Exception readEx) { /* ignore */ }
 				throw new RuntimeException("Python API Error: HTTP " + responseCode + " - " + errorResponse);
 			}
-// ▲▲▲ ここまで ▲▲▲
+
 
             StringBuilder response = new StringBuilder();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
@@ -209,7 +211,9 @@ public class CanvasServiceImpl extends RemoteServiceServlet implements CanvasSer
             // ▼▼▼ デバッグログ追加 (2/2) ▼▼▼
             System.out.println("--- [CanvasServiceImpl] Python API Response ---");
             System.out.println("MergedData Length: " + mergedPlainText.length());
-            System.out.println("MergedData (Preview): " + (mergedPlainText.length() > 200 ? mergedPlainText.substring(0, 200) : mergedPlainText));
+            System.out.println("MergedData : " + mergedPlainText);
+//            System.out.println("MergedData Length: " + mergedPlainText.length());
+//            System.out.println("MergedData (Preview): " + (mergedPlainText.length() > 200 ? mergedPlainText.substring(0, 200) : mergedPlainText));
             System.out.println("-----------------------------------------------");
             // ▲▲▲ デバッグログ追加 ▲▲▲
 
