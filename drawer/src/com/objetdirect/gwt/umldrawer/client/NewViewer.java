@@ -91,8 +91,9 @@ public class NewViewer extends DockPanel {
 		this.add(rightSideBar, DockPanel.EAST);
 		this.add(northBar, DockPanel.NORTH);
 		this.add(southBar, DockPanel.SOUTH);
-		this.drawerPanel = new DrawerPanel();
-		this.add(drawerPanel, DockPanel.CENTER);
+		// 修正後（例）
+		this.drawerPanel = new DrawerPanel(350, 10); // 新しく追加した「空っぽのレシピ」を呼び出す！
+		this.add(this.drawerPanel, DockPanel.CENTER); 
 	}
 
 	private void buttonsInit(){

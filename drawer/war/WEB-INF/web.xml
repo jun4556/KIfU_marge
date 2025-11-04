@@ -336,7 +336,7 @@
 		<servlet-name>SimServiceImpl</servlet-name>
 		<url-pattern>/gwtumldrawer/getSim</url-pattern>
 	</servlet-mapping>
-    <!-- 以下　柄澤追加部分 -->
+	<!-- 以下　柄澤追加部分 -->
     <servlet-mapping>
 		<servlet-name>CanvasServiceImpl</servlet-name>
 		<url-pattern>/gwtumldrawer/mergeCanvas</url-pattern>
@@ -355,5 +355,5 @@
 <!--		<servlet-name>CanvasServiceImpl</servlet-name>-->
 <!--		<url-pattern>/gwtumldrawer/canvas</url-pattern>-->
 <!--	</servlet-mapping>-->
-	
+
 </web-app>

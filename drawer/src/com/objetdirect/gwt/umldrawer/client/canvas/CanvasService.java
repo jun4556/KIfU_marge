@@ -3,53 +3,44 @@ package com.objetdirect.gwt.umldrawer.client.canvas;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-//import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.objetdirect.gwt.umldrawer.client.beans.EditEvent;
 import com.objetdirect.gwt.umldrawer.client.beans.SaveEventInfo;
 
-/**
- * GWT RPCのためのサービスインターフェース。
- * @RemoteServiceRelativePath("canvas") アノテーションにより、
- * このサービスのすべてのメソッド呼び出しが "/[モジュール名]/canvas" というURLに
- * マッピングされるようになります。これが404エラーを解決します。
- */
-//@RemoteServiceRelativePath("canvas")
-public interface CanvasService extends RemoteService {
+public interface CanvasService extends RemoteService{
 
-	// --- 既存のメソッド ---
-	public void saveCanvas(String studentId, int exercisesId, String canvasUrl);
+	public void saveCanvas( String studentId, int exercisesId, String canvasUrl);
 
 	public EditEvent loadCanvas(String studentId, int exercisesId);
 
 	public EditEvent undo(String studentId, int exercisesId);
 
-	public boolean saveCanvasAsAnswer(String studentId, int exercisesId, String canvasUrl);
+	public boolean saveCanvasAsAnswer( String studentId, int exercisesId, String canvasUrl);
 
 	public String getAnswer(int exerciseId);
 	
 	// --- マージ機能のために追加するメソッド ---
-	/**
-	 * AIマージサーバーを呼び出し、マージ結果の文字列（Base64）を取得します。
-	 * @param myUrl 自分のUMLデータ
-	 * @param opponentUrl 相手のUMLデータ
-	 * @return マージされたUMLデータ
-	 */
-	public String mergeCanvas(String myUrl, String opponentUrl);
+		/**
+		 * AIマージサーバーを呼び出し、マージ結果の文字列（Base64）を取得します。
+		 * @param myUrl 自分のUMLデータ
+		 * @param opponentUrl 相手のUMLデータ
+		 * @return マージされたUMLデータ
+		 */
+		public String mergeCanvas(String myUrl, String opponentUrl);
 
-	/**
-	 * マージ対象の候補となる、最近の保存イベントリストを取得します。
-	 * @param exerciseId 課題ID
-	 * @param currentStudentId 自分の学生ID（除外用）
-	 * @return 保存イベント情報のリスト
-	 */
-	public List<SaveEventInfo> getRecentSaves(int exerciseId, String currentStudentId);
+		/**
+		 * マージ対象の候補となる、最近の保存イベントリストを取得します。
+		 * @param exerciseId 課題ID
+		 * @param currentStudentId 自分の学生ID（除外用）
+		 * @return 保存イベント情報のリスト
+		 */
+		public List<SaveEventInfo> getRecentSaves(int exerciseId, String currentStudentId);
+		
+		/**
+		 * マージされたキャンバスデータを、共通IDをキーとして保存します。
+		 * @param commonId マージ識別のための共通ID
+		 * @param exerciseId 課題ID
+		 * @param canvasUrl マージされたUMLデータ
+		 */
+		public void saveMergedCanvas(String commonId, int exerciseId, String canvasUrl);
 	
-	/**
-	 * マージされたキャンバスデータを、共通IDをキーとして保存します。
-	 * @param commonId マージ識別のための共通ID
-	 * @param exerciseId 課題ID
-	 * @param canvasUrl マージされたUMLデータ
-	 */
-	public void saveMergedCanvas(String commonId, int exerciseId, String canvasUrl);
-
 }

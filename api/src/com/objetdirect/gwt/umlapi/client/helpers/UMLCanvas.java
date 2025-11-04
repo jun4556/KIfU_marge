@@ -100,7 +100,6 @@ import com.objetdirect.gwt.umlapi.client.yamazaki.replace.SurplusClassElement;
 import com.objetdirect.gwt.umlapi.client.yamazaki.replace.SurplusClassTypeElement;
 import com.objetdirect.gwt.umlapi.client.yamazaki.replace.SurplusMethodElement;
 import com.objetdirect.gwt.umlapi.client.yamazaki.replace.SurplusParameterElement;
-
 /**
  * @author Florian Mounier (mounier-dot-florian.at.gmail'dot'com)
  */
@@ -114,6 +113,7 @@ public class UMLCanvas extends AbsolutePanel {
 	private static long										objectCount						= 1;
 	private static long										lifeLineCount					= 1;
 	private String											copyBuffer 						= "";
+	public static WebSocketSender webSocketSender;
 	private long											noteCount;
 	private LinkKind										activeLinking;
 	private Point											selectBoxStartPoint;
@@ -279,6 +279,7 @@ public class UMLCanvas extends AbsolutePanel {
 ////				String targetPart, String beforeEdit, String afterEdit, String canvasUrl
 //		    }
 //		});
+		
 	}
 
 	/**
@@ -1739,7 +1740,19 @@ public class UMLCanvas extends AbsolutePanel {
 							selectedArtifact.moveTo(new Point(selectedArtifact.getLocation().getX() + direction.getXShift(),
 									selectedArtifact.getLocation().getY() + direction.getYShift()));
 
-							selectedArtifact.rebuildGfxObject(); // ← これを何とかすれば赤のままになる ならなかった
+							selectedArtifact.rebuildGfxObject();
+							if (UMLCanvas.webSocketSender != null) {
+							    String elementId = "element-" + selectedArtifact.getId();
+							    int newX = selectedArtifact.getLocation().getX();
+							    int newY = selectedArtifact.getLocation().getY();
+							    String message = "{\"action\":\"move\", \"elementId\":\"" + elementId + "\", \"x\":" + newX + ", \"y\":" + newY + "}";
+							    UMLCanvas.webSocketSender.send(message);
+							}
+							// dropメソッドの中のforループに追加
+
+							// --- ここから追加 ---
+							
+							// --- ここまで追加 ---// ← これを何とかすれば赤のままになる ならなかった
 						}
 					};
 				}

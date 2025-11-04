@@ -6,11 +6,20 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.objetdirect.gwt.umldrawer.client.beans.EditEvent;
 import com.objetdirect.gwt.umldrawer.client.beans.SaveEventInfo;
 
-/**
- * CanvasServiceの非同期インターフェース。
- * CanvasService.java にメソッドを追加したことに伴い、
- * こちらにも対応する非同期メソッドを追加します。
- */
+//public interface CanvasServiceAsync {
+//	@SuppressWarnings("rawtypes")
+//	public void saveCanvas(String studentId, int exercisesId, String canvasUrl, AsyncCallback callback);
+//	@SuppressWarnings("rawtypes")
+//	public void loadCanvas(String studentId, int exercisesId, AsyncCallback callback);
+//	@SuppressWarnings("rawtypes")
+//	public void undo(String studentId, int exercisesId, AsyncCallback callback);
+//	@SuppressWarnings("rawtypes")
+//	public void saveCanvasAsAnswer(String studentId, int exercisesId, String canvasUrl, AsyncCallback callback);
+//	//@gwt.typeArgs <com.objetdirect.gwt.umlapi.client.artifacts.UMLArtifact[]>
+//	public void getAnswer(int exerciseId, AsyncCallback callback);
+//
+//}
+
 public interface CanvasServiceAsync {
 
 	// --- 既存のメソッドの非同期版 ---
