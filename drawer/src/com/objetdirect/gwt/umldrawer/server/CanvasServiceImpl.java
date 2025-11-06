@@ -7,11 +7,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.objetdirect.gwt.umldrawer.client.beans.EditEvent;
-import com.objetdirect.gwt.umldrawer.client.beans.SaveEventInfo;
 import com.objetdirect.gwt.umldrawer.client.canvas.CanvasService;
 // ▼▼▼ import先が drawer 側の Dao になっていることを確認 ▼▼▼
 import com.objetdirect.gwt.umldrawer.server.dao.Dao;
@@ -77,13 +75,13 @@ public class CanvasServiceImpl extends RemoteServiceServlet implements CanvasSer
 	/**
 	 * マージ候補のリストを取得する処理
 	 */
-	@Override
-	public List<SaveEventInfo> getRecentSaves(int exerciseId, String currentStudentId) {
-		Dao dao = new Dao();
-		int limit = 10;
-		// drawer/Dao.java に追加した getRecentSaveEvents メソッドを呼び出す
-		return dao.getRecentSaveEvents(exerciseId, currentStudentId, limit);
-	}
+//	@Override
+//	public List<SaveEventInfo> getRecentSaves(int exerciseId, String currentStudentId) {
+//		Dao dao = new Dao();
+//		int limit = 10;
+//		// drawer/Dao.java に追加した getRecentSaveEvents メソッドを呼び出す
+//		return dao.getRecentSaveEvents(exerciseId, currentStudentId, limit);
+//	}
 
 	@Override
 	public String mergeCanvas(String myUrl, String opponentUrl) {

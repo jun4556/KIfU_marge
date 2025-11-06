@@ -912,7 +912,7 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 
 	    // 演習IDを使って、専用の"秘境"への道を作る
 		// ★★★ IPアドレスは君の環境に合わせてくれよな！ "localhost" か "192.168..." の方だ！ ★★★
-	    String webSocketURL = "ws://192.168.18.221:8080/KIfU4/diagram/" + exerciseId;
+	    String webSocketURL = "ws://192.168.18.204:8080/KIfU4/diagram/" + exerciseId;
 	    System.out.println("接続先URL: " + webSocketURL); // デバッグ用にコンソールに出力するぞ
 
 	    // 新しいWebSocketクライアントを作成し、接続を開始する
@@ -1186,6 +1186,75 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 		async.getExercise(exerciseId, callback);
 	}
 
+//	private void CanvasInit(){
+//
+//		//Canvas init
+//		CanvasServiceAsync async = (CanvasServiceAsync)GWT.create(CanvasService.class);
+//		ServiceDefTarget entryPoint = (ServiceDefTarget) async;
+//		String entryURL = GWT.getModuleBaseURL() + "loadCanvas";
+//		entryPoint.setServiceEntryPoint(entryURL);
+//
+//		@SuppressWarnings("rawtypes")
+//		AsyncCallback callback = new AsyncCallback(){
+//			@SuppressWarnings({ "unchecked", "deprecation" })
+//			public void onSuccess(Object result){
+//
+//				if( !( (EditEvent) result == null) ){
+//					Session.setMode("load");
+//					Session.getActiveCanvas().fromURL( ((EditEvent) result).getCanvasUrl() , false);
+//					uMLCanvas = Session.getActiveCanvas();
+//					UMLArtifact.setIdCount( ((EditEvent) result).getUmlArtifactId() );
+//					Session.setMode("drawer");
+//				}
+//				else{
+//					if(Session.exerciseId == 16){
+//						UMLArtifact.setIdCount(6);
+//						MyLoggerExecute.registEditEvent(-1, "Start", "Start",
+//								null, -1, null, -1, -1,
+//								null, null, null, DEFAULT_MODEL, 6);
+//
+//						Session.setMode("load");
+//						Session.getActiveCanvas().fromURL( DEFAULT_MODEL , false);
+//						uMLCanvas = Session.getActiveCanvas();
+//
+//						String str = String.valueOf(Session.getActiveCanvas()); //saito
+//						Window.alert(str);
+//						GWT.log("str::"+str);
+//
+//						Session.setMode("drawer");
+//					}
+//					else if(Session.exerciseId == 11){
+//						UMLArtifact.setIdCount(6);
+//						MyLoggerExecute.registEditEvent(-1, "Start", "Start",
+//								null, -1, null, -1, -1,
+//								null, null, null, DEFAULT_MODEL2, 6);
+//
+//						Session.setMode("load");
+//						Session.getActiveCanvas().fromURL( DEFAULT_MODEL2 , false);
+//						uMLCanvas = Session.getActiveCanvas();
+//						Session.setMode("drawer");
+//					}
+//					else{
+//						UMLArtifact.setIdCount(0);
+//						MyLoggerExecute.registEditEvent(-1, "Start", "Start",
+//								null, -1, null, -1, -1,
+//								null, null, null, "AA==", 0);
+//					}
+//					//TODO
+//
+//				}
+//			}
+//
+//			public void onFailure(Throwable caught){
+//				System.out.println(caught);
+//				Window.alert("CanvasInit 失敗");
+//			}
+//		};
+//
+//		async.loadCanvas(Session.studentId, Session.exerciseId, callback);
+//	}
+	
+	
 	private void CanvasInit(){
 
 		//Canvas init
@@ -1201,6 +1270,8 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 
 				if( !( (EditEvent) result == null) ){
 					Session.setMode("load");
+					// ▼▼▼ 修正箇所 1/3 (clearCanvas() を追加) ▼▼▼
+					Session.getActiveCanvas().clearCanvas();
 					Session.getActiveCanvas().fromURL( ((EditEvent) result).getCanvasUrl() , false);
 					uMLCanvas = Session.getActiveCanvas();
 					UMLArtifact.setIdCount( ((EditEvent) result).getUmlArtifactId() );
@@ -1214,6 +1285,8 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 								null, null, null, DEFAULT_MODEL, 6);
 
 						Session.setMode("load");
+						// ▼▼▼ 修正箇所 2/3 (clearCanvas() を追加) ▼▼▼
+						Session.getActiveCanvas().clearCanvas();
 						Session.getActiveCanvas().fromURL( DEFAULT_MODEL , false);
 						uMLCanvas = Session.getActiveCanvas();
 
@@ -1230,6 +1303,8 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 								null, null, null, DEFAULT_MODEL2, 6);
 
 						Session.setMode("load");
+						// ▼▼▼ 修正箇所 3/3 (clearCanvas() を追加) ▼▼▼
+						Session.getActiveCanvas().clearCanvas();
 						Session.getActiveCanvas().fromURL( DEFAULT_MODEL2 , false);
 						uMLCanvas = Session.getActiveCanvas();
 						Session.setMode("drawer");
@@ -1255,152 +1330,159 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	}
 	
 	//20251014**********************************************************************
-		//マージ用のID入力ダイアログを表示するメソッド
-		private void showMergeDialog() {
-		    // ダイアログボックスを作成
-		    final DialogBox dialogBox = new DialogBox();
-		    dialogBox.setText("マージ相手の情報を入力");
-		    dialogBox.setAnimationEnabled(true);
-		    dialogBox.setGlassEnabled(true);
+	//マージ用のID入力ダイアログを表示するメソッド
+			private void showMergeDialog() {
+			    // ダイアログボックスを作成
+			    final DialogBox dialogBox = new DialogBox();
+			    dialogBox.setText("マージ相手の情報を入力");
+			    dialogBox.setAnimationEnabled(true);
+			    dialogBox.setGlassEnabled(true);
 
-		    
-		    // ダイアログ内の要素を配置するパネル
-		    VerticalPanel dialogContents = new VerticalPanel();
-		    dialogContents.setSpacing(4);
+			    
+			    // ダイアログ内の要素を配置するパネル
+			    VerticalPanel dialogContents = new VerticalPanel();
+			    dialogContents.setSpacing(4);
 
-		    // 相手の学生ID入力欄
-		    dialogContents.add(new Label("マージする相手の学生ID:"));
-		    final TextBox opponentIdTextBox = new TextBox();
-		    dialogContents.add(opponentIdTextBox);
+			    // 相手の学生ID入力欄
+			    dialogContents.add(new Label("マージする相手の学生ID:"));
+			    final TextBox opponentIdTextBox = new TextBox();
+			    dialogContents.add(opponentIdTextBox);
 
-		    // マージ後の共通ID入力欄
-		    dialogContents.add(new Label("マージ後の共通ID:"));
-		    final TextBox commonIdTextBox = new TextBox();
-		    dialogContents.add(commonIdTextBox);
+			    // ▼▼▼ 修正箇所 1/3 (相手の演習ID入力欄を追加) ▼▼▼
+			    dialogContents.add(new Label("マージする相手の演習ID:"));
+			    final TextBox opponentExerciseIdTextBox = new TextBox();
+			    dialogContents.add(opponentExerciseIdTextBox);
+			    // ▲▲▲ 修正箇所 1/3 ▲▲▲
 
-		    // 実行ボタン
-		    Button mergeExecuteButton = new Button("実行", new ClickHandler() {
-		        public void onClick(ClickEvent event) {
-		            String opponentId = opponentIdTextBox.getText();
-		            String commonId = commonIdTextBox.getText();
+			    // マージ後の共通ID入力欄
+			    dialogContents.add(new Label("マージ後の共通ID:"));
+			    final TextBox commonIdTextBox = new TextBox();
+			    dialogContents.add(commonIdTextBox);
 
-		            if (opponentId.isEmpty() || commonId.isEmpty()) {
-		                Window.alert("IDを両方入力してください。");
-		                return;
-		            }
+			    // 実行ボタン
+			    Button mergeExecuteButton = new Button("実行", new ClickHandler() {
+			        public void onClick(ClickEvent event) {
+			            String opponentId = opponentIdTextBox.getText();
+			            // ▼▼▼ 修正箇所 2/3 (演習IDの取得とチェック) ▼▼▼
+			            String commonId = commonIdTextBox.getText();
+			            String opponentExerciseIdStr = opponentExerciseIdTextBox.getText();
+			            int opponentExerciseId = -1;
 
-		            // 入力されたIDを使ってマージ処理を開始
-		            executeMerge(opponentId, commonId);
-		            dialogBox.hide(); // 処理を開始したらダイアログを閉じる
-		        }
-		    });
-		    
-		    Button closeButton = new Button("閉じる", new ClickHandler() {
-		    	public void onClick(ClickEvent event) {
-		    		dialogBox.hide(); 
-		    		}
-		    	});
-		 // ボタンを横に並べる
-		    HorizontalPanel buttonPanel = new HorizontalPanel();
-		    buttonPanel.setSpacing(10);
-		    buttonPanel.add(mergeExecuteButton);
-		    buttonPanel.add(closeButton); // 閉じるボタンを追加
-		    // dialogContents.add(mergeExecuteButton); // ← 元の行をコメントアウト
-		    dialogContents.add(buttonPanel); // ← 新しいボタンパネルに入れ替える
-		    // ▲▲▲ オプションここまで ▲▲▲
-		    dialogBox.setWidget(dialogContents);
-		    dialogBox.center(); // 画面中央に表示
-		    }
-		
+			            if (opponentId.isEmpty() || commonId.isEmpty() || opponentExerciseIdStr.isEmpty()) {
+			                Window.alert("IDをすべて入力してください。");
+			                return;
+			            }
 
-		/**
-		 * 相手のURLを取得し、マージ処理を実行する
-		 * @param opponentId 相手の学生ID
-		 * @param commonId マージ後の共通ID
-		 */
-		// DrawerBase.java の executeMerge メソッドを修正
+			            try {
+			                opponentExerciseId = Integer.parseInt(opponentExerciseIdStr);
+			            } catch (NumberFormatException e) {
+			                Window.alert("相手の演習IDは数値で入力してください。");
+			                return;
+			            }
+			            // ▲▲▲ 修正箇所 2/3 ▲▲▲
 
-		private void executeMerge(final String opponentId, final String commonId) {
-		    // 1. 相手のCanvas URLを取得
-		    CanvasServiceAsync loadAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);	 // ▼▼▼ エンドポイント設定を追加 (CanvasInitメソッドを参考に "loadCanvas" を指定) ▼▼▼
-		    ServiceDefTarget loadEntryPoint = (ServiceDefTarget) loadAsync;
-		    String loadEntryURL = GWT.getModuleBaseURL() + "loadCanvas";
-		    loadEntryPoint.setServiceEntryPoint(loadEntryURL);
+			            // 入力されたIDを使ってマージ処理を開始
+			            executeMerge(opponentId, opponentExerciseId, commonId); // 引数を変更
+			            dialogBox.hide(); // 処理を開始したらダイアログを閉じる
+			        }
+			    });
+			    
+			    Button closeButton = new Button("閉じる", new ClickHandler() {
+			    	public void onClick(ClickEvent event) {
+			    		dialogBox.hide(); 
+			    		}
+			    	});
+			 // ボタンを横に並べる
+			    HorizontalPanel buttonPanel = new HorizontalPanel();
+			    buttonPanel.setSpacing(10);
+			    buttonPanel.add(mergeExecuteButton);
+			    buttonPanel.add(closeButton); 
+			    dialogContents.add(buttonPanel); 
+			    dialogBox.setWidget(dialogContents);
+			    dialogBox.center(); // 画面中央に表示
+			}
+			
+			/**
+			 * 相手のURLを取得し、マージ処理を実行する
+			 * @param opponentId 相手の学生ID
+			 * @param opponentExerciseId 相手の演習ID
+			 * @param commonId マージ後の共通ID
+			 */
+			// ▼▼▼ 修正箇所 3/3 (executeMerge メソッドのシグネチャと呼び出し) ▼▼▼
+			private void executeMerge(final String opponentId, final int opponentExerciseId, final String commonId) {
+			    // 1. 相手のCanvas URLを取得
+			    CanvasServiceAsync loadAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);
+			    ServiceDefTarget loadEntryPoint = (ServiceDefTarget) loadAsync;
+			    String loadEntryURL = GWT.getModuleBaseURL() + "loadCanvas";
+			    loadEntryPoint.setServiceEntryPoint(loadEntryURL);
 
-		    // ... (ServiceDefTargetの設定) ...
-		    loadAsync.loadCanvas(opponentId, Session.exerciseId, new AsyncCallback<EditEvent>() {
-		        public void onFailure(Throwable caught) {
-		            Window.alert("相手のデータの取得に失敗しました: " + caught.getMessage());
-		        }
+			    // Session.exerciseId ではなく、引数で渡された opponentExerciseId を使用する
+			    loadAsync.loadCanvas(opponentId, opponentExerciseId, new AsyncCallback<EditEvent>() {
+			        public void onFailure(Throwable caught) {
+			            Window.alert("相手のデータの取得に失敗しました: " + caught.getMessage());
+			        }
 
-		        public void onSuccess(EditEvent opponentData) {
-		            if (opponentData == null) {
-		                Window.alert("指定された相手のデータが見つかりません。");
-		                return;
-		            }
+			        public void onSuccess(EditEvent opponentData) {
+			            
+			            if (opponentData == null || opponentData.getCanvasUrl() == null || opponentData.getCanvasUrl().isEmpty() || opponentData.getCanvasUrl().equals("AA==")) {
+			                Window.alert("指定された相手(ID:" + opponentId + ", 演習ID:" + opponentExerciseId + ")の保存データが見つかりません。");
+			                return; // マージ処理を中断
+			            }
 
-		            String opponentUrl = opponentData.getCanvasUrl();
-		            String myUrl = uMLCanvas.toUrl();
+			            String opponentUrl = opponentData.getCanvasUrl();
+			            String myUrl = uMLCanvas.toUrl();
 
-		            // 2. サーバーのマージ機能を呼び出す
-		            CanvasServiceAsync mergeAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);	         // ▼▼▼ エンドポイント設定を追加 (サービス名を "mergeCanvas" と仮定) ▼▼▼
-		            ServiceDefTarget mergeEntryPoint = (ServiceDefTarget) mergeAsync;
-		            // "mergeCanvas" が正しいサービスパスであることを確認してください (web.xmlなど)
-		            String mergeEntryURL = GWT.getModuleBaseURL() + "mergeCanvas"; 
-		            mergeEntryPoint.setServiceEntryPoint(mergeEntryURL);
+			            // 2. サーバーのマージ機能を呼び出す (ここは変更なし)
+			            CanvasServiceAsync mergeAsync = (CanvasServiceAsync) GWT.create(CanvasService.class);
+			            ServiceDefTarget mergeEntryPoint = (ServiceDefTarget) mergeAsync;
+			            String mergeEntryURL = GWT.getModuleBaseURL() + "mergeCanvas"; 
+			            mergeEntryPoint.setServiceEntryPoint(mergeEntryURL);
 
-		            // ... (ServiceDefTargetの設定) ...
-		            mergeAsync.mergeCanvas(myUrl, opponentUrl, new AsyncCallback<String>() {
-		                @Override
-		                public void onFailure(Throwable caught) {
-		                    Window.alert("マージ処理中にエラーが発生しました: " + caught.getMessage());
-		                }
+			            mergeAsync.mergeCanvas(myUrl, opponentUrl, new AsyncCallback<String>() {
+			                @Override
+			                public void onFailure(Throwable caught) {
+			                    Window.alert("マージ処理中にエラーが発生しました: " + caught.getMessage());
+			                }
 
-		                @Override
-		                public void onSuccess(String mergedUrl) {
-		                    Window.alert("マージが完了しました。共通ID「" + commonId + "」で結果を保存します。");
-							
-							// 1. 現在の studentId をバックアップ
-							String originalStudentId = Session.studentId; 
-							
-							try {
-								// 2. Session の studentId を commonId に一時的に設定
-								//    (これにより MyLoggerExecute は commonId を studentId として扱います)
-								Session.studentId = commonId;
+			                @Override
+			                public void onSuccess(String mergedUrl) {
+			                    Window.alert("マージが完了しました。共通ID「" + commonId + "」で結果を保存します。");
 								
-								// 3. MyLoggerExecute を呼び出す (Saveボタンと同じロジック)
-								MyLoggerExecute.registEditEvent(
-										-1, // preEventId
-										"Merge", // editEvent
-										"Merge", // eventType
-										null, // targetType
-										-1, // targetId
-										null, // linkKind
-										-1, // rightObjectId
-										-1, // leftObjectId
-										null, // targetPart
-										null, // beforeEdit
-										null, // afterEdit
-										mergedUrl, // canvasUrl (マージされたURL)
-										UMLArtifact.getIdCount() // 現在のIDカウント
-								);
+								String originalStudentId = Session.studentId; 
 								
-								Window.alert("マージ結果を共通ID「" + commonId + "」でログ保存しました。");
-								
-							} catch (Exception e) {
-								Window.alert("マージログの保存に失敗しました: " + e.getMessage());
-							} finally {
-								// 4. studentId を必ず元に戻す
-								Session.studentId = originalStudentId;
-							}
-
-//		                    Session.getActiveCanvas().fromURL(mergedUrl, false); // キャンバスにマージ結果を反映
-		                }
-		            });
-		        }
-		    });
-		}
-		
+								try {
+									Session.studentId = commonId;
+									
+									MyLoggerExecute.registEditEvent(
+											-1, // preEventId
+											"Merge", // editEvent
+											"Merge", // eventType
+											null, // targetType
+											-1, // targetId
+											null, // linkKind
+											-1, // rightObjectId
+											-1, // leftObjectId
+											null, // targetPart
+											null, // beforeEdit
+											null, // afterEdit
+											mergedUrl, // canvasUrl (マージされたURL)
+											UMLArtifact.getIdCount() // 現在のIDカウント
+									);
+									
+									Window.alert("マージ結果を共通ID「" + commonId + "」でログ保存しました。");
+									
+								} catch (Exception e) {
+									Window.alert("マージログの保存に失敗しました: " + e.getMessage());
+								} finally {
+									Session.studentId = originalStudentId;
+								}
+//			                    Session.getActiveCanvas().fromURL(mergedUrl, false); 
+			                }
+			            });
+			        }
+			    });
+			}
+			// ▲▲▲ 修正箇所 3/3 ▲▲▲
 
 		/**
 		 * マージ後のURLをサーバーに保存する

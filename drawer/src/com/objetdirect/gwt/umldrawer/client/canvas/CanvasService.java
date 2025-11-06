@@ -1,10 +1,7 @@
 package com.objetdirect.gwt.umldrawer.client.canvas;
 
-import java.util.List;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.objetdirect.gwt.umldrawer.client.beans.EditEvent;
-import com.objetdirect.gwt.umldrawer.client.beans.SaveEventInfo;
 
 public interface CanvasService extends RemoteService{
 
@@ -27,13 +24,13 @@ public interface CanvasService extends RemoteService{
 		 */
 		public String mergeCanvas(String myUrl, String opponentUrl);
 
-		/**
-		 * マージ対象の候補となる、最近の保存イベントリストを取得します。
-		 * @param exerciseId 課題ID
-		 * @param currentStudentId 自分の学生ID（除外用）
-		 * @return 保存イベント情報のリスト
-		 */
-		public List<SaveEventInfo> getRecentSaves(int exerciseId, String currentStudentId);
+//		/**
+//		 * マージ対象の候補となる、最近の保存イベントリストを取得します。
+//		 * @param exerciseId 課題ID
+//		 * @param currentStudentId 自分の学生ID（除外用）
+//		 * @return 保存イベント情報のリスト
+//		 */
+//		public List<SaveEventInfo> getRecentSaves(int exerciseId, String currentStudentId);
 		
 		/**
 		 * マージされたキャンバスデータを、共通IDをキーとして保存します。
@@ -42,5 +39,5 @@ public interface CanvasService extends RemoteService{
 		 * @param canvasUrl マージされたUMLデータ
 		 */
 		public void saveMergedCanvas(String commonId, int exerciseId, String canvasUrl);
-	
+		
 }
