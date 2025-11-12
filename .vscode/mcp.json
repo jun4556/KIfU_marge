@@ -1,0 +1,72 @@
+{
+    "servers": {
+        "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/",
+            "gallery": true
+        },
+        "mcp-feedback-enhanced": {
+            "type": "stdio",
+            "command": "uvx",
+            "args": [
+                "mcp-feedback-enhanced@latest"
+            ],
+            "timeout": 600000,
+            "env": {
+                "MCP_DESKTOP_MODE": "false",
+                "MCP_WEB_HOST": "localhost",
+                "MCP_WEB_PORT": "8765",
+                "MCP_LANGUAGE": "en",
+                "FORCE_WEB": "true"
+            },
+            "autoApprove": [
+                "interactive_feedback"
+            ]
+        },
+        "MCP_DOCKER": {
+            "command": "docker",
+            "args": [
+                "mcp",
+                "gateway",
+                "run"
+            ],
+            "type": "stdio"
+        },
+        "chrome-devtools": {
+            "command": "npx",
+            "args": [
+                "chrome-devtools-mcp@latest"
+            ]
+        },
+        "mcp-pdf-reader": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/Safe-Swiss-Cloud-AG/mcp_pdf_reader@main",
+                "mcp_pdf_reader"
+            ]
+        },
+        "fetch": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-fetch"
+            ]
+        },
+        "kubernetes": {
+            "command": "npx",
+            "args": [
+                "mcp-server-kubernetes"
+            ],
+        },
+        "serena": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/oraios/serena",
+                "serena",
+                "start-mcp-server"
+            ]
+        }
+    },
+    "inputs": []
+}
