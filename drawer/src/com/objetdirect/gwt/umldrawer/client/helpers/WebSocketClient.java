@@ -54,6 +54,11 @@ public class WebSocketClient {
             this.@com.objetdirect.gwt.umldrawer.client.helpers.WebSocketClient::ws = null;
         }
     }-*/;
+    
+    public native boolean isOpen() /*-{
+        return this.@com.objetdirect.gwt.umldrawer.client.helpers.WebSocketClient::ws &&
+               this.@com.objetdirect.gwt.umldrawer.client.helpers.WebSocketClient::ws.readyState === WebSocket.OPEN;
+    }-*/;
  // WebSocketClient.java の onMessage メソッドをこれに置き換える
 
     public void onMessage(String message) {
@@ -90,6 +95,23 @@ public class WebSocketClient {
                     if (drawerPanel != null) {
                         // DrawerPanelに、パッチを適用する新しい命令を出す！
                         drawerPanel.applyPatchToArtifactText(elementId, partId, patchText);
+                    }
+                }
+                else if ("editOperationResponse".equals(action)) {
+                    // OT方式の編集操作レスポンス
+                    int serverSequence = (int) jsonObject.get("serverSequence").isNumber().doubleValue();
+                    String elementId = jsonObject.get("elementId").isString().stringValue();
+                    String partId = jsonObject.get("partId").isString().stringValue();
+                    String afterText = jsonObject.get("afterText").isString().stringValue();
+                    String userId = jsonObject.get("userId").isString().stringValue();
+                    
+                    // 自分の操作かどうかを判定
+                    boolean isOwnOperation = jsonObject.containsKey("isOwnOperation") && 
+                                            jsonObject.get("isOwnOperation").isBoolean().booleanValue();
+                    
+                    if (drawerPanel != null) {
+                        // DrawerPanelのOTヘルパーを使用して操作を適用
+                        drawerPanel.applyOTOperation(serverSequence, elementId, partId, afterText, userId, isOwnOperation);
                     }
                 }
             }

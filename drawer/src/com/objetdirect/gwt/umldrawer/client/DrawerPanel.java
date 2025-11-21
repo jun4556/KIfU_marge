@@ -39,6 +39,7 @@ import com.objetdirect.gwt.umlapi.client.helpers.UMLCanvas;
 import com.objetdirect.gwt.umlapi.client.umlcomponents.UMLDiagram;
 import com.objetdirect.gwt.umlapi.client.umlcomponents.UMLDiagram.Type;
 import com.objetdirect.gwt.umldrawer.client.helpers.DiffMatchPatchGwt;
+import com.objetdirect.gwt.umldrawer.client.helpers.OperationTransformHelper;
 
 public class DrawerPanel extends AbsolutePanel {
 
@@ -51,9 +52,7 @@ public class DrawerPanel extends AbsolutePanel {
 	private SimplePanel topRightCornerShadow;
 	private int width;
 
-	// --- ここからが改造箇所だ！ ---
-	private DrawerBase drawerBase; // drawerBaseをしまっておく宝箱
-	// --- 改造箇所ここまで ---
+\t// --- ここからが改造箇所だ！ ---\n\tprivate DrawerBase drawerBase; // drawerBaseをしまっておく宝箱\n\t// --- 改造箇所ここまで ---\n\t\n\t// OT方式のための追加フィールド\n\tprivate int clientSequence = 0; // クライアント側のシーケンス番号\n\tprivate int lastServerSequence = 0; // 最後に受信したサーバーシーケンス番号\n\tprivate OperationTransformHelper otHelper; // OT操作送受信ヘルパー
 
 	FocusPanel topLeft = new FocusPanel();
 	FocusPanel top = new FocusPanel();

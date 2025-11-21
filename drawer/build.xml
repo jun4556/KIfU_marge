@@ -10,6 +10,11 @@
     <pathelement location="${gwt.sdk}/gwt-user.jar"/>
     <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
     <!-- Add any additional non-server libs (such as JUnit) -->
+    <!-- OT方式の実装に必要なライブラリ -->
+    <fileset dir="war/WEB-INF/lib" includes="diff-match-patch*.jar"/>
+    <fileset dir="war/WEB-INF/lib" includes="javax.websocket-api*.jar"/>
+    <fileset dir="war/WEB-INF/lib" includes="gson*.jar"/>
+    <!-- その他のライブラリ -->
     <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
   	<!-- <fileset dir="../GWTUMLAPI/build/dist/" includes="gwt-umlapi.jar"/> -->
   </path>
