@@ -1,5 +1,6 @@
 package com.objetdirect.gwt.umldrawer.client.helpers;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -24,8 +25,7 @@ public class OperationTransformHelper {
     
     /**
      * テキスト変更をOT方式で送信
-     * 
-     * @param elementId 要素ID
+     * * @param elementId 要素ID
      * @param partId パートID（name, stereotype等）
      * @param beforeText 変更前テキスト
      * @param afterText 変更後テキスト
@@ -33,9 +33,15 @@ public class OperationTransformHelper {
     public void sendTextChangeWithOT(String elementId, String partId, String beforeText, String afterText) {
         clientSequence++;
         
-        // diff-match-patchでパッチを生成
-        DiffMatchPatchGwtExtended dmp = new DiffMatchPatchGwtExtended();
-        String patchText = dmp.createPatches(beforeText, afterText);
+        // --- 修正箇所: パッチ生成プロセス ---
+        DiffMatchPatchGwt dmp = new DiffMatchPatchGwt();
+        
+        // 1. パッチオブジェクト(JavaScriptObject)を生成
+        JavaScriptObject patches = dmp.patch_make(beforeText, afterText);
+        
+        // 2. パッチオブジェクトを文字列(String)に変換
+        String patchText = dmp.patch_toText(patches);
+        // --------------------------------
         
         // JSONメッセージを構築
         JSONObject message = new JSONObject();
@@ -60,8 +66,7 @@ public class OperationTransformHelper {
     
     /**
      * サーバーから受信した操作を適用
-     * 
-     * @param operation サーバーから受信した操作
+     * * @param operation サーバーから受信した操作
      * @return 適用後のテキスト
      */
     public String applyServerOperation(EditOperation operation) {

@@ -39,4 +39,25 @@ public class DiffMatchPatchGwt {
         var results = this.@com.objetdirect.gwt.umldrawer.client.helpers.DiffMatchPatchGwt::dmp.patch_apply(patches, currentText);
         return results[0]; // 結果の配列の0番目に、新しいテキストが入っている
     }-*/;
+
+    // --- 今回追加したメソッド ---
+
+    /**
+     * 2つのテキストの差分を取り、パッチオブジェクトを生成する。
+     * @param text1 元のテキスト
+     * @param text2 変更後のテキスト
+     * @return JavaScriptのパッチオブジェクト
+     */
+    public native JavaScriptObject patch_make(String text1, String text2) /*-{
+        return this.@com.objetdirect.gwt.umldrawer.client.helpers.DiffMatchPatchGwt::dmp.patch_make(text1, text2);
+    }-*/;
+
+    /**
+     * パッチオブジェクトをテキスト形式（文字列）に変換する。
+     * @param patches JavaScriptのパッチオブジェクト
+     * @return パッチの文字列表現
+     */
+    public native String patch_toText(JavaScriptObject patches) /*-{
+        return this.@com.objetdirect.gwt.umldrawer.client.helpers.DiffMatchPatchGwt::dmp.patch_toText(patches);
+    }-*/;
 }

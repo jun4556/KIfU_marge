@@ -19,8 +19,7 @@ public class WebSocketMessageHandler {
     
     /**
      * 受信したメッセージを解析して適切なアクションを実行
-     * 
-     * @param message JSONフォーマットのメッセージ
+     * * @param message JSONフォーマットのメッセージ
      */
     public void handleMessage(String message) {
         try {
@@ -63,13 +62,11 @@ public class WebSocketMessageHandler {
             // 他のユーザーの操作の場合のみ適用
             // （自分の操作は既にローカルで楽観的に適用済み）
             boolean isOwnOperation = json.containsKey("isOwnOperation") && 
-                                    json.get("isOwnOperation").isBoolean().booleanValue();
+                                     json.get("isOwnOperation").isBoolean().booleanValue();
             
-            if (!isOwnOperation && drawerPanel != null) {
-                drawerPanel.applyServerOperation(serverSequence, elementId, partId, afterText);
-            } else if (isOwnOperation) {
-                // 自分の操作の場合、サーバーシーケンス番号のみ更新
-                // TODO: 必要に応じて、サーバーのトランスフォーム結果との差分を調整
+            if (drawerPanel != null) {
+                // 修正箇所: DrawerPanelのメソッド名と引数に合わせて修正
+                drawerPanel.applyOTOperation(serverSequence, elementId, partId, afterText, userId, isOwnOperation);
             }
             
         } catch (Exception e) {
@@ -85,6 +82,7 @@ public class WebSocketMessageHandler {
         try {
             String url = json.get("url").isString().stringValue();
             if (drawerPanel != null && drawerPanel.getDrawerBaseInstance() != null) {
+                // DrawerBaseにこのメソッドが存在することを確認してください
                 drawerPanel.getDrawerBaseInstance().syncCanvasFromServer(url);
             }
         } catch (Exception e) {

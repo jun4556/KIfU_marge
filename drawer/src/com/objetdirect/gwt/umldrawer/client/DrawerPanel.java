@@ -40,6 +40,8 @@ import com.objetdirect.gwt.umlapi.client.umlcomponents.UMLDiagram;
 import com.objetdirect.gwt.umlapi.client.umlcomponents.UMLDiagram.Type;
 import com.objetdirect.gwt.umldrawer.client.helpers.DiffMatchPatchGwt;
 import com.objetdirect.gwt.umldrawer.client.helpers.OperationTransformHelper;
+import com.objetdirect.gwt.umldrawer.client.helpers.WebSocketClient;
+
 
 public class DrawerPanel extends AbsolutePanel {
 
@@ -51,8 +53,15 @@ public class DrawerPanel extends AbsolutePanel {
 	private SimplePanel rightShadow;
 	private SimplePanel topRightCornerShadow;
 	private int width;
-
-\t// --- ここからが改造箇所だ！ ---\n\tprivate DrawerBase drawerBase; // drawerBaseをしまっておく宝箱\n\t// --- 改造箇所ここまで ---\n\t\n\t// OT方式のための追加フィールド\n\tprivate int clientSequence = 0; // クライアント側のシーケンス番号\n\tprivate int lastServerSequence = 0; // 最後に受信したサーバーシーケンス番号\n\tprivate OperationTransformHelper otHelper; // OT操作送受信ヘルパー
+	
+	// --- ここからが改造箇所だ！ ---
+	private DrawerBase drawerBase; // drawerBaseをしまっておく宝箱
+	// --- 改造箇所ここまで ---
+	
+	// OT方式のための追加フィールド
+	private int clientSequence = 0; // クライアント側のシーケンス番号
+	private int lastServerSequence = 0; // 最後に受信したサーバーシーケンス番号
+	private OperationTransformHelper otHelper; // OT操作送受信ヘルパー
 
 	FocusPanel topLeft = new FocusPanel();
 	FocusPanel top = new FocusPanel();
@@ -289,8 +298,7 @@ public class DrawerPanel extends AbsolutePanel {
 	public DrawerBase getDrawerBaseInstance() {
 		return this.drawerBase;
 	}
-	// DrawerPanel.java のクラスの一番最後に追加
-
+	
 	/**
 	 * 指定されたIDの図形（アーティファクト）の、指定された部分のテキストを更新するメソッドだ。
 	 * @param elementId 更新対象の図形のID
@@ -458,15 +466,69 @@ public class DrawerPanel extends AbsolutePanel {
 	public void fromURL(String url, boolean isForPasting) {
 		this.uMLCanvas.fromURL(url, isForPasting);
 	}
-	// DrawerPanel.java のクラスの一番最後に追加
 
 	/**
-	 * テキスト変更のパッチ適用を"受け取った"という事実だけを使い、
-	 * 最終的にはCRDT（監視塔作戦）と同じ全体同期で画面を更新するメソッド。
-	 * これがクライアント側のライブラリ制限を回避する、最も確実な方法だ。
+	 * OperationTransformHelperを初期化
+	 * WebSocket接続確立後に呼び出す
 	 */
-	// DrawerPanel.java の applyPatchToArtifactText メソッドをこれに置き換える
-
+	public void initializeOTHelper(String userId, int exerciseId) {
+	    WebSocketClient webSocketClient = getWebSocketClient();
+	    if (webSocketClient != null) {
+	        this.otHelper = new OperationTransformHelper(webSocketClient, userId, exerciseId);
+	    }
+	}
+	
+	/**
+	 * テキスト変更をOT方式で送信
+	 * 既存のsendTextUpdateメソッドの代わりに使用
+	 */
+	public void sendTextChangeWithOT(String elementId, String partId, String beforeText, String afterText) {
+	    if (otHelper != null) {
+	        otHelper.sendTextChangeWithOT(elementId, partId, beforeText, afterText);
+	    }
+	}
+	
+	/**
+	 * サーバーからのOT操作を適用
+	 * WebSocketClientから呼び出される
+	 */
+	public void applyOTOperation(int serverSequence, String elementId, String partId, 
+	                             String afterText, String userId, boolean isOwnOperation) {
+	    if (otHelper != null) {
+	        // サーバーシーケンスを更新
+	        otHelper.setLastServerSequence(serverSequence);
+	    }
+	    
+	    // 自分の操作の場合は既に適用済みなので何もしない
+	    if (isOwnOperation) {
+	        return;
+	    }
+	    
+	    // 他ユーザーの操作の場合は、テキストを更新
+	    updateArtifactText(elementId, partId, afterText);
+	}
+	
+	/**
+	 * OTヘルパーを取得（テスト用）
+	 */
+	public OperationTransformHelper getOTHelper() {
+	    return otHelper;
+	}
+	
+	/**
+	 * WebSocketClientを取得（プライベートメソッド）
+	 * DrawerBaseから取得する実装を想定
+	 */
+	private WebSocketClient getWebSocketClient() {
+	    if (drawerBase != null) {
+	        return drawerBase.getWebSocketClient();
+	    }
+	    return null;
+	}
+	
+	/**
+	 * パッチを適用してテキストを更新する（WebSocketClientから呼ばれる）
+	 */
 	public void applyPatchToArtifactText(String elementId, String partId, String patchText) {
 	    try {
 	        int id = Integer.parseInt(elementId.substring("element-".length()));
@@ -474,29 +536,30 @@ public class DrawerPanel extends AbsolutePanel {
 
 	        if (artifact != null) {
 	            String currentText = "";
-
-	            // --- どの部分のテキストを更新するか、ここで特定する！ ---
+	            // クラス名の場合
 	            if (artifact instanceof ClassArtifact && partId.contains("ClassPartNameArtifact")) {
 	                currentText = ((ClassArtifact) artifact).getUMLClass().getName();
 	            }
-	            // (今後、属性や操作のテキストを更新する場合は、ここにelse ifを追加していく)
+	            // ※他のアーティファクトタイプ（属性、操作など）への対応も必要ならここに追加
 
-	            // --- JSNIの魔法陣を使って、パッチを適用する！ ---
+	            // パッチ適用 (DiffMatchPatchGwtを使用)
 	            DiffMatchPatchGwt dmp = new DiffMatchPatchGwt();
 	            JavaScriptObject patches = dmp.patchFromText(patchText);
+	            
+	            // パッチ適用結果を取得（配列の0番目がテキスト）
+	            // 注意: 以下の行は dmp.patchApply の戻り値の型によって調整が必要な場合がありますが
+	            // まずは標準的な実装として配置します
 	            String newText = dmp.patchApply(patches, currentText);
-	            // --- 魔法はここまで ---
 
-	            // --- 特定した部分のテキストを、新しいものに更新する！ ---
+	            // 反映
 	            if (artifact instanceof ClassArtifact && partId.contains("ClassPartNameArtifact")) {
 	                ((ClassArtifact) artifact).getUMLClass().setName(newText);
 	            }
-
-	            // 変更を画面に反映させるために、図形を再描画する
+	            
 	            artifact.rebuildGfxObject();
 	        }
 	    } catch (Exception e) {
-	        System.err.println("パッチの適用、またはテキストの更新に失敗: " + e.getMessage());
+	        System.err.println("パッチ適用エラー: " + e.getMessage());
 	    }
 	}
 }
