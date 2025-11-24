@@ -16,12 +16,16 @@
 ## Backend
 - HikariCP: Database connection pooling
 - GWT RPC: Client-server communication
+- **Java WebSocket API (javax.websocket-api 1.1)**: WebSocket support for OT implementation
+- **Gson 2.8.9**: JSON processing for WebSocket messages
+- **diff-match-patch 1.2**: Text diff/patch operations for OT
 
 ## Development Environment
 - **GWT SDK Path**: `C:\gwt-2.8.2-custom`
 - **Encoding**: UTF-8
 - **IDE**: Eclipse (`.settings/` directories present)
 - **OS**: Windows
+- **Application Server**: Tomcat 8+ (required for WebSocket support)
 
 ## Build System
 Apache Ant with the following targets:

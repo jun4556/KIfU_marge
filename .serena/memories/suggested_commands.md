@@ -44,8 +44,44 @@ mysql -u root -p gwtumldrawer < drawer\kifu6.sql
 SQL files available:
 - `api\20150903kifu3.sql`
 - `api\20161019kifu5.sql`
+- `api\operation_log.sql` (OT implementation)
 - `drawer\kifu6.sql`
 - `drawer\kifu6_akagidp.sql`
+
+Create operation_log table (OT implementation):
+```cmd
+setup_database.bat
+```
+or manually:
+```cmd
+mysql -u root -p < api\operation_log.sql
+```
+
+## OT Implementation Commands
+
+### Download Required Libraries
+```cmd
+download_libraries.bat
+```
+This downloads:
+- diff-match-patch-1.2.jar
+- javax.websocket-api-1.1.jar
+- gson-2.8.9.jar
+
+### Build with OT Support
+```cmd
+cd drawer
+ant clean
+ant build
+ant war
+```
+
+### Deploy to Tomcat
+```cmd
+copy drawer\KIfU4.war %CATALINA_HOME%\webapps\
+```
+
+Note: Requires Tomcat 8 or later for WebSocket support.
 
 ## Windows Shell Commands
 

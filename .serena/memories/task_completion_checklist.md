@@ -78,6 +78,9 @@ ant build
 - [ ] No compilation errors
 - [ ] GWT compilation successful
 - [ ] Code follows project conventions
+- [ ] If OT-related changes: libraries downloaded to drawer/war/WEB-INF/lib/
+- [ ] If database changes: SQL migration tested
+- [ ] Integration tests passed (if applicable)
 - [ ] UTF-8 encoding maintained
 - [ ] Comments/documentation updated (Japanese if applicable)
 - [ ] Tested in browser (if UI changes)

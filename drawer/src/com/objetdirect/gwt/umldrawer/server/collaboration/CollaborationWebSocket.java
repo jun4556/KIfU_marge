@@ -141,8 +141,12 @@ public class CollaborationWebSocket {
      * 処理された操作をDBに保存
      */
     private void saveOperationToDatabase(EditOperation operation) {
+        java.sql.Connection connection = null;
+        java.sql.PreparedStatement stmt = null;
+        
         try {
             Dao dao = new Dao();
+            connection = dao.createConnection();
             
             // operation_logテーブルに保存
             String sql = "INSERT INTO operation_log " +
@@ -152,26 +156,34 @@ public class CollaborationWebSocket {
                         "timestamp, date) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
             
-            dao.execUpdate(sql, 
-                operation.getUserId(),
-                operation.getExerciseId(),
-                operation.getElementId(),
-                operation.getPartId(),
-                operation.getOperationType(),
-                operation.getPatchText(),
-                operation.getBeforeText(),
-                operation.getAfterText(),
-                operation.getClientSequence(),
-                operation.getServerSequence(),
-                operation.getBasedOnServerSequence(),
-                operation.getTimestamp()
-            );
+            stmt = connection.prepareStatement(sql);
+            stmt.setString(1, operation.getUserId());
+            stmt.setInt(2, operation.getExerciseId());
+            stmt.setString(3, operation.getElementId());
+            stmt.setString(4, operation.getPartId());
+            stmt.setString(5, operation.getOperationType());
+            stmt.setString(6, operation.getPatchText());
+            stmt.setString(7, operation.getBeforeText());
+            stmt.setString(8, operation.getAfterText());
+            stmt.setInt(9, operation.getClientSequence());
+            stmt.setInt(10, operation.getServerSequence());
+            stmt.setInt(11, operation.getBasedOnServerSequence());
+            stmt.setLong(12, operation.getTimestamp());
+            
+            stmt.executeUpdate();
             
             logger.info("操作をDBに保存しました。ServerSeq: " + operation.getServerSequence());
             
         } catch (Exception e) {
             logger.severe("DB保存エラー: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (connection != null) connection.close();
+            } catch (Exception e) {
+                logger.warning("リソースクローズ失敗: " + e.getMessage());
+            }
         }
     }
     
@@ -195,7 +207,14 @@ public class CollaborationWebSocket {
                 try {
                     // 送信者には「自分の操作」フラグを付与
                     if (session.equals(senderSession)) {
-                        JsonObject selfResponse = response.deepCopy();
+                        JsonObject selfResponse = new JsonObject();
+                        selfResponse.addProperty("action", "editOperationResponse");
+                        selfResponse.addProperty("serverSequence", operation.getServerSequence());
+                        selfResponse.addProperty("elementId", operation.getElementId());
+                        selfResponse.addProperty("partId", operation.getPartId());
+                        selfResponse.addProperty("afterText", operation.getAfterText());
+                        selfResponse.addProperty("userId", operation.getUserId());
+                        selfResponse.addProperty("patchText", operation.getPatchText());
                         selfResponse.addProperty("isOwnOperation", true);
                         session.getBasicRemote().sendText(gson.toJson(selfResponse));
                     } else {
