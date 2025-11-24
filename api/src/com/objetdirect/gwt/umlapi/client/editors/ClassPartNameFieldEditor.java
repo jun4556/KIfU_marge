@@ -75,6 +75,13 @@ public class ClassPartNameFieldEditor extends FieldEditor {
 
 			((ClassPartNameArtifact) this.artifact).setClassName(newName);
 			((ClassPartNameArtifact) this.artifact).getNodeArtifact().rebuildGfxObject();
+			
+			// OT方式でテキスト変更を送信
+			if (UMLCanvas.webSocketSender != null && !oldContent.equals(newName)) {
+			    String elementId = "element-" + classId;
+			    String partId = "ClassPartNameArtifact";
+			    UMLCanvas.webSocketSender.sendTextChangeWithOT(elementId, partId, oldContent, newName);
+			}
 
 			if (newName.equals("")) {
 				((ClassPartNameArtifact) this.artifact).setClassName("Class");

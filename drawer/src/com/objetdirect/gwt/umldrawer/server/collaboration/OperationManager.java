@@ -41,6 +41,70 @@ public class OperationManager {
     }
     
     /**
+     * 移動操作を処理
+     * 
+     * @param operation クライアントから送信された移動操作
+     * @return サーバーで処理された操作（他のクライアントに配信すべきもの）
+     */
+    public synchronized EditOperation transformMoveOperation(EditOperation operation) {
+        int exerciseId = operation.getExerciseId();
+        
+        // 初期化処理
+        initializeExercise(exerciseId);
+        
+        // グローバルシーケンス番号を割り当て
+        int serverSeq = sequenceCounters.get(exerciseId).incrementAndGet();
+        operation.setServerSequence(serverSeq);
+        
+        // 操作履歴から、同じ要素に対する同時移動操作を取得
+        List<EditOperation> history = operationHistory.get(exerciseId);
+        List<EditOperation> concurrentMoves = getConcurrentMoveOperations(
+            history,
+            operation.getElementId(),
+            operation.getBasedOnServerSequence()
+        );
+        
+        // 同時に発生した移動操作がある場合、deltaを合成
+        int finalDeltaX = operation.getDeltaX();
+        int finalDeltaY = operation.getDeltaY();
+        
+        for (EditOperation concurrentOp : concurrentMoves) {
+            if ("move_delta".equals(concurrentOp.getOperationType())) {
+                finalDeltaX += concurrentOp.getDeltaX();
+                finalDeltaY += concurrentOp.getDeltaY();
+            }
+        }
+        
+        // 合成されたdeltaを設定
+        operation.setDeltaX(finalDeltaX);
+        operation.setDeltaY(finalDeltaY);
+        
+        // 操作履歴に追加
+        history.add(operation);
+        
+        return operation;
+    }
+    
+    /**
+     * 同じ要素に対する同時移動操作を取得
+     */
+    private List<EditOperation> getConcurrentMoveOperations(
+        List<EditOperation> history,
+        String elementId,
+        int basedOnSeq
+    ) {
+        List<EditOperation> concurrent = new ArrayList<>();
+        for (EditOperation op : history) {
+            if (op.getServerSequence() > basedOnSeq &&
+                "move_delta".equals(op.getOperationType()) &&
+                elementId.equals(op.getElementId())) {
+                concurrent.add(op);
+            }
+        }
+        return concurrent;
+    }
+    
+    /**
      * 新しい編集操作を受信し、適切に処理する
      * 
      * @param operation クライアントから送信された編集操作

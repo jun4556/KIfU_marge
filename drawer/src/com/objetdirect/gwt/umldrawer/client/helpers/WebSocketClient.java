@@ -114,6 +114,25 @@ public class WebSocketClient {
                         drawerPanel.applyOTOperation(serverSequence, elementId, partId, afterText, userId, isOwnOperation);
                     }
                 }
+                else if ("moveOperationResponse".equals(action)) {
+                    // OT方式の移動操作レスポンス
+                    int serverSequence = (int) jsonObject.get("serverSequence").isNumber().doubleValue();
+                    String elementId = jsonObject.get("elementId").isString().stringValue();
+                    int oldX = (int) jsonObject.get("oldX").isNumber().doubleValue();
+                    int oldY = (int) jsonObject.get("oldY").isNumber().doubleValue();
+                    int deltaX = (int) jsonObject.get("deltaX").isNumber().doubleValue();
+                    int deltaY = (int) jsonObject.get("deltaY").isNumber().doubleValue();
+                    String userId = jsonObject.get("userId").isString().stringValue();
+                    
+                    // 自分の操作かどうかを判定
+                    boolean isOwnOperation = jsonObject.containsKey("isOwnOperation") && 
+                                            jsonObject.get("isOwnOperation").isBoolean().booleanValue();
+                    
+                    if (drawerPanel != null) {
+                        // DrawerPanelのOTヘルパーを使用して移動を適用
+                        drawerPanel.applyMoveOTOperation(serverSequence, elementId, oldX, oldY, deltaX, deltaY, userId, isOwnOperation);
+                    }
+                }
             }
         } catch (Exception e) {
             System.err.println("受信したメッセージの解析に失敗: " + message);

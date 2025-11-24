@@ -73,22 +73,88 @@ public class CollaborationWebSocket {
      */
     private void handleEditOperation(JsonObject json, Session senderSession) {
         try {
-            // JSONからEditOperationを構築
-            EditOperation operation = parseEditOperation(json);
+            // 操作タイプを確認
+            String operationType = json.has("operationType") ? json.get("operationType").getAsString() : "text_update";
             
-            // OperationManagerで処理（トランスフォーム含む）
-            EditOperation processedOp = operationManager.processOperation(operation);
-            
-            // DBに保存
-            saveOperationToDatabase(processedOp);
-            
-            // 全クライアントに配信
-            broadcastOperation(processedOp, senderSession);
+            if ("move_delta".equals(operationType)) {
+                handleMoveOperation(json, senderSession);
+            } else {
+                // テキスト編集操作
+                EditOperation operation = parseEditOperation(json);
+                EditOperation processedOp = operationManager.processOperation(operation);
+                saveOperationToDatabase(processedOp);
+                broadcastOperation(processedOp, senderSession);
+            }
             
         } catch (Exception e) {
             logger.severe("編集操作の処理エラー: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * 移動操作を処理
+     */
+    private void handleMoveOperation(JsonObject json, Session senderSession) {
+        try {
+            // JSONから移動操作を構築
+            EditOperation operation = parseMoveOperation(json);
+            
+            // OperationManagerで処理（delta合成）
+            EditOperation processedOp = operationManager.transformMoveOperation(operation);
+            
+            // DBに保存
+            saveMoveOperationToDatabase(processedOp);
+            
+            // 全クライアントに配信
+            broadcastMoveOperation(processedOp, senderSession);
+            
+        } catch (Exception e) {
+            logger.severe("移動操作の処理エラー: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * JSONから移動操作を構築
+     */
+    private EditOperation parseMoveOperation(JsonObject json) {
+        EditOperation op = new EditOperation();
+        
+        if (json.has("clientSequence")) {
+            op.setClientSequence(json.get("clientSequence").getAsInt());
+        }
+        if (json.has("basedOnServerSequence")) {
+            op.setBasedOnServerSequence(json.get("basedOnServerSequence").getAsInt());
+        }
+        if (json.has("userId")) {
+            op.setUserId(json.get("userId").getAsString());
+        }
+        if (json.has("elementId")) {
+            op.setElementId(json.get("elementId").getAsString());
+        }
+        op.setOperationType("move_delta");
+        
+        if (json.has("oldX")) {
+            op.setOldX(json.get("oldX").getAsInt());
+        }
+        if (json.has("oldY")) {
+            op.setOldY(json.get("oldY").getAsInt());
+        }
+        if (json.has("deltaX")) {
+            op.setDeltaX(json.get("deltaX").getAsInt());
+        }
+        if (json.has("deltaY")) {
+            op.setDeltaY(json.get("deltaY").getAsInt());
+        }
+        if (json.has("exerciseId")) {
+            op.setExerciseId(json.get("exerciseId").getAsInt());
+        }
+        if (json.has("timestamp")) {
+            op.setTimestamp(json.get("timestamp").getAsLong());
+        }
+        
+        return op;
     }
     
     /**
@@ -135,6 +201,100 @@ public class CollaborationWebSocket {
         }
         
         return op;
+    }
+    
+    /**
+     * 移動操作をDBに保存
+     */
+    private void saveMoveOperationToDatabase(EditOperation operation) {
+        java.sql.Connection connection = null;
+        java.sql.PreparedStatement stmt = null;
+        
+        try {
+            Dao dao = new Dao();
+            connection = dao.createConnection();
+            
+            // operation_logテーブルに保存
+            String sql = "INSERT INTO operation_log " +
+                        "(user_id, exercise_id, element_id, operation_type, " +
+                        "old_x, old_y, delta_x, delta_y, " +
+                        "client_sequence, server_sequence, based_on_sequence, " +
+                        "timestamp, date) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+            
+            stmt = connection.prepareStatement(sql);
+            stmt.setString(1, operation.getUserId());
+            stmt.setInt(2, operation.getExerciseId());
+            stmt.setString(3, operation.getElementId());
+            stmt.setString(4, operation.getOperationType());
+            stmt.setInt(5, operation.getOldX());
+            stmt.setInt(6, operation.getOldY());
+            stmt.setInt(7, operation.getDeltaX());
+            stmt.setInt(8, operation.getDeltaY());
+            stmt.setInt(9, operation.getClientSequence());
+            stmt.setInt(10, operation.getServerSequence());
+            stmt.setInt(11, operation.getBasedOnServerSequence());
+            stmt.setLong(12, operation.getTimestamp());
+            
+            stmt.executeUpdate();
+            
+            logger.info("移動操作をDBに保存しました。ServerSeq: " + operation.getServerSequence());
+            
+        } catch (Exception e) {
+            logger.severe("移動操作DB保存エラー: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (connection != null) connection.close();
+            } catch (Exception e) {
+                logger.warning("リソースクローズ失敗: " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * 全クライアントに移動操作を配信
+     */
+    private void broadcastMoveOperation(EditOperation operation, Session senderSession) {
+        JsonObject response = new JsonObject();
+        response.addProperty("action", "moveOperationResponse");
+        response.addProperty("serverSequence", operation.getServerSequence());
+        response.addProperty("elementId", operation.getElementId());
+        response.addProperty("oldX", operation.getOldX());
+        response.addProperty("oldY", operation.getOldY());
+        response.addProperty("deltaX", operation.getDeltaX());
+        response.addProperty("deltaY", operation.getDeltaY());
+        response.addProperty("userId", operation.getUserId());
+        
+        String jsonString = gson.toJson(response);
+        
+        synchronized (sessions) {
+            for (Session session : sessions) {
+                try {
+                    // 送信者には「自分の操作」フラグを付与
+                    if (session.equals(senderSession)) {
+                        JsonObject selfResponse = new JsonObject();
+                        selfResponse.addProperty("action", "moveOperationResponse");
+                        selfResponse.addProperty("serverSequence", operation.getServerSequence());
+                        selfResponse.addProperty("elementId", operation.getElementId());
+                        selfResponse.addProperty("oldX", operation.getOldX());
+                        selfResponse.addProperty("oldY", operation.getOldY());
+                        selfResponse.addProperty("deltaX", operation.getDeltaX());
+                        selfResponse.addProperty("deltaY", operation.getDeltaY());
+                        selfResponse.addProperty("userId", operation.getUserId());
+                        selfResponse.addProperty("isOwnOperation", true);
+                        session.getBasicRemote().sendText(gson.toJson(selfResponse));
+                    } else {
+                        session.getBasicRemote().sendText(jsonString);
+                    }
+                } catch (IOException e) {
+                    logger.warning("移動操作配信失敗: " + e.getMessage());
+                }
+            }
+        }
+        
+        logger.info("移動操作を全クライアントに配信しました。ServerSeq: " + operation.getServerSequence());
     }
     
     /**

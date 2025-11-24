@@ -489,6 +489,15 @@ public class DrawerPanel extends AbsolutePanel {
 	}
 	
 	/**
+	 * 移動をOT方式で送信
+	 */
+	public void sendMoveWithOT(String elementId, int oldX, int oldY, int deltaX, int deltaY) {
+	    if (otHelper != null) {
+	        otHelper.sendMoveOperation(elementId, oldX, oldY, deltaX, deltaY);
+	    }
+	}
+	
+	/**
 	 * サーバーからのOT操作を適用
 	 * WebSocketClientから呼び出される
 	 */
@@ -509,7 +518,46 @@ public class DrawerPanel extends AbsolutePanel {
 	}
 	
 	/**
-	 * OTヘルパーを取得（テスト用）
+	 * サーバーからのOT移動操作を適用
+	 * WebSocketClientから呼び出される
+	 */
+	public void applyMoveOTOperation(int serverSequence, String elementId, int oldX, int oldY, 
+	                                 int deltaX, int deltaY, String userId, boolean isOwnOperation) {
+	    if (otHelper != null) {
+	        // サーバーシーケンスを更新
+	        otHelper.setLastServerSequence(serverSequence);
+	    }
+	    
+	    // 自分の操作の場合は既に適用済みなので何もしない
+	    if (isOwnOperation) {
+	        return;
+	    }
+	    
+	    // 他ユーザーの移動操作の場合は、アーティファクトの位置を更新
+	    try {
+	        int id = Integer.parseInt(elementId.substring("element-".length()));
+	        UMLArtifact artifact = UMLArtifact.getArtifactById(id);
+	        
+	        if (artifact != null && artifact.isDraggable()) {
+	            // 現在の位置を取得
+	            Point currentLocation = artifact.getLocation();
+	            
+	            // デルタを適用して新しい位置を計算
+	            int newX = currentLocation.getX() + deltaX;
+	            int newY = currentLocation.getY() + deltaY;
+	            Point newLocation = Point.getPoint(newX, newY);
+	            
+	            // アーティファクトを新しい位置に移動
+	            artifact.moveTo(newLocation);
+	            artifact.rebuildGfxObject();
+	        }
+	    } catch (Exception e) {
+	        // element IDのパースに失敗した場合は何もしない
+	    }
+	}
+	
+	/**
+	 * OTヘルパーを取得(テスト用)
 	 */
 	public OperationTransformHelper getOTHelper() {
 	    return otHelper;

@@ -1997,6 +1997,17 @@ public class UMLCanvas extends AbsolutePanel {
 				selectedArtifact.moveTo(Point.substract(Point.add(selectedArtifact.getLocation(), this.totalDragShift), this.duringDragOffset));
 
 				selectedArtifact.rebuildGfxObject();
+				
+				// OT方式で移動を送信
+				if (UMLCanvas.webSocketSender != null) {
+				    String elementId = "element-" + selectedArtifact.getId();
+				    Point newPoint = selectedArtifact.getLocation();
+				    int deltaX = newPoint.getX() - oldPoint.getX();
+				    int deltaY = newPoint.getY() - oldPoint.getY();
+				    if (deltaX != 0 || deltaY != 0) {
+				        UMLCanvas.webSocketSender.sendMoveWithOT(elementId, oldPoint.getX(), oldPoint.getY(), deltaX, deltaY);
+				    }
+				}
 
 
 				//TODO dropEvent

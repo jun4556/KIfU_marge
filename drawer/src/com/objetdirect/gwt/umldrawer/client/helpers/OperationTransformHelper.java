@@ -65,6 +65,38 @@ public class OperationTransformHelper {
     }
     
     /**
+     * 移動をOT方式で送信
+     * @param elementId 要素ID
+     * @param oldX 移動前X座標
+     * @param oldY 移動前Y座標
+     * @param deltaX X方向移動量
+     * @param deltaY Y方向移動量
+     */
+    public void sendMoveOperation(String elementId, int oldX, int oldY, int deltaX, int deltaY) {
+        clientSequence++;
+        
+        // JSONメッセージを構築
+        JSONObject message = new JSONObject();
+        message.put("action", new JSONString("editOperation"));
+        message.put("clientSequence", new JSONNumber(clientSequence));
+        message.put("basedOnServerSequence", new JSONNumber(lastServerSequence));
+        message.put("userId", new JSONString(userId));
+        message.put("elementId", new JSONString(elementId));
+        message.put("operationType", new JSONString("move_delta"));
+        message.put("oldX", new JSONNumber(oldX));
+        message.put("oldY", new JSONNumber(oldY));
+        message.put("deltaX", new JSONNumber(deltaX));
+        message.put("deltaY", new JSONNumber(deltaY));
+        message.put("exerciseId", new JSONNumber(exerciseId));
+        message.put("timestamp", new JSONNumber(System.currentTimeMillis()));
+        
+        // WebSocket経由で送信
+        if (webSocketClient != null && webSocketClient.isOpen()) {
+            webSocketClient.send(message.toString());
+        }
+    }
+    
+    /**
      * サーバーから受信した操作を適用
      * * @param operation サーバーから受信した操作
      * @return 適用後のテキスト

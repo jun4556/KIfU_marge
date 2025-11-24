@@ -880,6 +880,20 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 		            webSocketClient.send(message);
 		        }
 		    }
+		    
+		    public void sendTextChangeWithOT(String elementId, String partId, String beforeText, String afterText) {
+		        // OT方式でテキスト変更を送信
+		        if (drawerPanel != null) {
+		            drawerPanel.sendTextChangeWithOT(elementId, partId, beforeText, afterText);
+		        }
+		    }
+		    
+		    public void sendMoveWithOT(String elementId, int oldX, int oldY, int deltaX, int deltaY) {
+		        // OT方式で移動を送信
+		        if (drawerPanel != null) {
+		            drawerPanel.sendMoveWithOT(elementId, oldX, oldY, deltaX, deltaY);
+		        }
+		    }
 		};
 
 		mainPanel.showWidget(0);
@@ -916,6 +930,15 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	    // 新しいWebSocketクライアントを作成し、接続を開始する
 	    this.webSocketClient = new WebSocketClient(this.drawerPanel);
 	    this.webSocketClient.connect(webSocketURL);
+	    
+	    // ★★★ OT方式のヘルパーを初期化する ★★★
+	    if (this.drawerPanel != null && DrawerSession.student != null) {
+	        this.drawerPanel.initializeOTHelper(
+	            DrawerSession.student.getStudentId(), 
+	            Integer.parseInt(exerciseId)
+	        );
+	        System.out.println("OTヘルパー初期化完了: userId=" + DrawerSession.student.getStudentId() + ", exerciseId=" + exerciseId);
+	    }
 
 	    // "監視塔"作戦をリセットして、新しい演習の監視を開始する
 	    this.lastCanvasUrl = ""; // 前回の状態をリセット

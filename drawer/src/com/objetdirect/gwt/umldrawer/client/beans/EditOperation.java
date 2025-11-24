@@ -49,6 +49,18 @@ public class EditOperation implements Serializable {
     /** エクササイズID（課題ID） */
     private int exerciseId;
     
+    /** 移動操作用: 移動前X座標 */
+    private int oldX;
+    
+    /** 移動操作用: 移動前Y座標 */
+    private int oldY;
+    
+    /** 移動操作用: X方向移動量 */
+    private int deltaX;
+    
+    /** 移動操作用: Y方向移動量 */
+    private int deltaY;
+    
     public EditOperation() {
         this.timestamp = System.currentTimeMillis();
     }
@@ -157,6 +169,38 @@ public class EditOperation implements Serializable {
     
     public void setExerciseId(int exerciseId) {
         this.exerciseId = exerciseId;
+    }
+    
+    public int getOldX() {
+        return oldX;
+    }
+    
+    public void setOldX(int oldX) {
+        this.oldX = oldX;
+    }
+    
+    public int getOldY() {
+        return oldY;
+    }
+    
+    public void setOldY(int oldY) {
+        this.oldY = oldY;
+    }
+    
+    public int getDeltaX() {
+        return deltaX;
+    }
+    
+    public void setDeltaX(int deltaX) {
+        this.deltaX = deltaX;
+    }
+    
+    public int getDeltaY() {
+        return deltaY;
+    }
+    
+    public void setDeltaY(int deltaY) {
+        this.deltaY = deltaY;
     }
     
     @Override
