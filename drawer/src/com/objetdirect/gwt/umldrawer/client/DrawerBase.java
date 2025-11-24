@@ -26,7 +26,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.objetdirect.gwt.umlapi.client.artifacts.UMLArtifact;
 import com.objetdirect.gwt.umlapi.client.helpers.Session;
 import com.objetdirect.gwt.umlapi.client.helpers.UMLCanvas;
-import com.objetdirect.gwt.umlapi.client.helpers.WebSocketSender;
 import com.objetdirect.gwt.umlapi.client.mylogger.MyLoggerExecute;
 import com.objetdirect.gwt.umlapi.client.umlcomponents.UMLDiagram;
 import com.objetdirect.gwt.umlapi.client.umlcomponents.UMLLink.LinkKind;
@@ -874,8 +873,7 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 		this.syncTimer.scheduleRepeating(500);
 
 		// UMLCanvasが持つ"契約者"の宝箱に、我こそが契約者だと名乗り出る！
-		UMLCanvas.webSocketSender = new WebSocketSender() {
-		    @Override
+		UMLCanvas.webSocketSender = new com.objetdirect.gwt.umlapi.client.helpers.WebSocketSender() {
 		    public void send(String message) {
 		        // 契約が実行されたら、実際のWebSocketクライアントに荷物を渡す
 		        if (webSocketClient != null) {
