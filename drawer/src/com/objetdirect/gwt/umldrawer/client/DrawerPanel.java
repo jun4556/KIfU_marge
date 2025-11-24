@@ -545,7 +545,7 @@ public class DrawerPanel extends AbsolutePanel {
 	            // デルタを適用して新しい位置を計算
 	            int newX = currentLocation.getX() + deltaX;
 	            int newY = currentLocation.getY() + deltaY;
-	            Point newLocation = Point.getPoint(newX, newY);
+	            Point newLocation = new Point(newX, newY);
 	            
 	            // アーティファクトを新しい位置に移動
 	            artifact.moveTo(newLocation);
