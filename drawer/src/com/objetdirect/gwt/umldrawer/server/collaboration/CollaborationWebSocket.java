@@ -60,11 +60,46 @@ public class CollaborationWebSocket {
             if ("editOperation".equals(action)) {
                 handleEditOperation(json, session);
             }
-            // 他のアクションもここで処理可能
+            else if ("sync".equals(action)) {
+                // キャンバス全体の同期: 他のクライアントにブロードキャスト
+                broadcastToOthers(message, session);
+                logger.info("syncメッセージをブロードキャストしました");
+            }
+            else if ("textUpdate".equals(action)) {
+                // テキスト更新: 他のクライアントにブロードキャスト
+                broadcastToOthers(message, session);
+                logger.info("textUpdateメッセージをブロードキャストしました");
+            }
+            else if ("applyPatch".equals(action)) {
+                // パッチ適用: 他のクライアントにブロードキャスト
+                broadcastToOthers(message, session);
+                logger.info("applyPatchメッセージをブロードキャストしました");
+            }
+            else {
+                logger.warning("不明なアクション: " + action);
+            }
             
         } catch (Exception e) {
             logger.severe("メッセージ処理エラー: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 送信者以外の全クライアントにメッセージをブロードキャスト
+     * sync, textUpdate, applyPatch メッセージの配信に使用
+     */
+    private void broadcastToOthers(String message, Session senderSession) {
+        synchronized (sessions) {
+            for (Session session : sessions) {
+                if (session.isOpen() && !session.equals(senderSession)) {
+                    try {
+                        session.getBasicRemote().sendText(message);
+                    } catch (IOException e) {
+                        logger.warning("メッセージ送信エラー (セッション: " + session.getId() + "): " + e.getMessage());
+                    }
+                }
+            }
         }
     }
     
