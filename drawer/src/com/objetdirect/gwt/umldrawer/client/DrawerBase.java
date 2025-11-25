@@ -922,10 +922,10 @@ public class DrawerBase extends DockPanel implements IDrawerBaseConectThread{
 	        this.webSocketClient.disconnect();
 	    }
 
-	    // 演習IDを使って、専用の"秘境"への道を作る
+	    // OT方式のための専用WebSocket接続URL
 		// ★★★ IPアドレスは君の環境に合わせてくれよな！ "localhost" か "192.168..." の方だ！ ★★★
-	    String webSocketURL = "ws://192.168.1.241:8080/KIfU4/diagram/" + exerciseId;
-	    System.out.println("接続先URL: " + webSocketURL); // デバッグ用にコンソールに出力するぞ
+	    String webSocketURL = "ws://192.168.1.241:8080/KIfU4/collaboration";
+	    System.out.println("OT接続先URL: " + webSocketURL); // デバッグ用にコンソールに出力するぞ
 
 	    // 新しいWebSocketクライアントを作成し、接続を開始する
 	    this.webSocketClient = new WebSocketClient(this.drawerPanel);

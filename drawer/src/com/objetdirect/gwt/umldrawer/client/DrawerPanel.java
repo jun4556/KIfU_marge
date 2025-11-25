@@ -539,12 +539,10 @@ public class DrawerPanel extends AbsolutePanel {
 	        UMLArtifact artifact = UMLArtifact.getArtifactById(id);
 	        
 	        if (artifact != null && artifact.isDraggable()) {
-	            // 現在の位置を取得
-	            Point currentLocation = artifact.getLocation();
-	            
-	            // デルタを適用して新しい位置を計算
-	            int newX = currentLocation.getX() + deltaX;
-	            int newY = currentLocation.getY() + deltaY;
+	            // サーバーから送られた基準点(oldX, oldY)とデルタを使用
+	            // currentLocationは使用しない(既に他の操作で移動している可能性があるため)
+	            int newX = oldX + deltaX;
+	            int newY = oldY + deltaY;
 	            Point newLocation = new Point(newX, newY);
 	            
 	            // アーティファクトを新しい位置に移動
